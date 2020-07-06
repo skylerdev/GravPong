@@ -1,4 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include "Paddle.h"
+#include "Ball.h"
+#include <iostream>
+
 
 class Game{
 
@@ -8,37 +12,51 @@ class Game{
 
 	private:
 		void processEvents();
-		void update();
+		void update(sf::Time);
 		void render();
 		void handlePlayerInput(sf::Keyboard::Key, bool);
 
 	private:
 		sf::RenderWindow mWindow;
-		sf::CircleShape mPlayer;
+		Ball ball;
+		//Paddle lPaddle = Paddle(true);
+		//Paddle rPaddle = Paddle;
 		bool mIsMovingUp = false;
 		bool mIsMovingDown = false;
 		bool mIsMovingRight = false;
 		bool mIsMovingLeft = false;
-	
+		const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+		
+		
+		unsigned int width = 1200;
+	    unsigned int height = 800;
+
+	 
 
 };
 
 //This constuctor not only constructs Game(), but also creates an mWindow with args and uses methods
 //to set properties of mPlayer somehow
 Game::Game()
-: mWindow(sf::VideoMode(640, 480), "SFML")
-, mPlayer()
+: mWindow(sf::VideoMode(1200, 800), "SFML")
+, ball()
 {
-	mPlayer.setRadius(40.f);
-	mPlayer.setPosition(100.f, 100.f);
-	mPlayer.setFillColor(sf::Color::Cyan);
+	
 }
 
 void Game::run(){
 
+	sf::Clock clock;
+	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 	while (mWindow.isOpen()) {
+		
 		processEvents();
-		update();
+		timeSinceLastUpdate += clock.restart();
+		while (timeSinceLastUpdate > TimePerFrame) {
+			timeSinceLastUpdate -= TimePerFrame;
+			processEvents();
+			update(TimePerFrame);
+		}
 		render();
 	}
 }
@@ -80,23 +98,60 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
 
 }
 
-void Game::update() {
+void Game::update(sf::Time deltaTime) {
 	sf::Vector2f movement(0.f, 0.f);
 	if (mIsMovingUp)
-		movement.y -= 1.f;
+		movement.y -= 2.f;
 	if (mIsMovingDown)
-		movement.y += 1.f;
+		movement.y += 2.f;
 	if (mIsMovingRight)
-		movement.x += 1.f;
+		movement.x += 2.f;
 	if (mIsMovingLeft)
-		movement.x -= 1.f;
+		movement.x -= 2.f;
 
-	mPlayer.move(movement);
+	//update the paddles
+	
+
+	//update the ball
+	ball.move(ball.velocity * deltaTime.asSeconds());
+	//collision detection
+
+	//detect if ball is above screen
+	if (ball.getPosition().y < 0) {
+		//set to top of screen, reverse velocity
+		ball.setPosition(ball.getPosition().x, 0);
+		ball.velocity.y = ball.velocity.y * -1;
+	}
+	
+	//detect if ball is below screen
+
+	if (ball.getPosition().y + ball.getRadius() > height ) {
+		ball.setPosition(ball.getPosition().x, height-ball.getRadius());
+		ball.velocity.y = ball.velocity.y * -1;
+	}
+
+	//detect is ball is to the right of screen
+	
+	if (ball.getPosition().x + ball.getRadius() > width) {
+		ball.setPosition(width-ball.getRadius(), ball.getPosition().y);
+		ball.velocity.x = ball.velocity.x * -1;
+	}
+
+	//detect if ball is left of screen
+
+	if (ball.getPosition().x < 0) {
+		ball.setPosition(0, ball.getPosition().y);
+		ball.velocity.x = ball.velocity.x * -1;
+	}
+
+    
+	
+
 }
 
 void Game::render(){
 	mWindow.clear();
-	mWindow.draw(mPlayer);
+	mWindow.draw(ball);
 	mWindow.display();
 }
 
