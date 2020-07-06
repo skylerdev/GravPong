@@ -15,10 +15,10 @@ class Game{
 	private:
 		sf::RenderWindow mWindow;
 		sf::CircleShape mPlayer;
-		bool mIsMovingUp;
-		bool mIsMovingDown;
-		bool mIsMovingRight;
-		bool mIsMovingLeft;
+		bool mIsMovingUp = false;
+		bool mIsMovingDown = false;
+		bool mIsMovingRight = false;
+		bool mIsMovingLeft = false;
 	
 
 };
@@ -81,7 +81,17 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
 }
 
 void Game::update() {
+	sf::Vector2f movement(0.f, 0.f);
+	if (mIsMovingUp)
+		movement.y -= 1.f;
+	if (mIsMovingDown)
+		movement.y += 1.f;
+	if (mIsMovingRight)
+		movement.x += 1.f;
+	if (mIsMovingLeft)
+		movement.x -= 1.f;
 
+	mPlayer.move(movement);
 }
 
 void Game::render(){
