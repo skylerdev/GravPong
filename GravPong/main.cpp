@@ -2,6 +2,7 @@
 #include "Paddle.h"
 #include "Ball.h"
 #include <iostream>
+#include "Consts.h"
 
 
 class Game{
@@ -19,8 +20,8 @@ class Game{
 	private:
 		sf::RenderWindow mWindow;
 		Ball ball;
-		//Paddle lPaddle = Paddle(true);
-		//Paddle rPaddle = Paddle;
+		Paddle lPaddle = Paddle(true);
+		Paddle rPaddle = Paddle(false);
 		bool mIsMovingUp = false;
 		bool mIsMovingDown = false;
 		bool mIsMovingRight = false;
@@ -28,8 +29,7 @@ class Game{
 		const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 		
 		
-		unsigned int width = 1200;
-	    unsigned int height = 800;
+	
 
 	 
 
@@ -114,37 +114,20 @@ void Game::update(sf::Time deltaTime) {
 
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
-	//collision detection
 
-	//detect if ball is above screen
-	if (ball.getPosition().y < 0) {
-		//set to top of screen, reverse velocity
-		ball.setPosition(ball.getPosition().x, 0);
-		ball.velocity.y = ball.velocity.y * -1;
-	}
+	//update the paddles
+	lPaddle.move(movement);
+
+	//update ball velocity if colliding
+	ball.collision(lPaddle, rPaddle);
+
+
+
 	
-	//detect if ball is below screen
 
-	if (ball.getPosition().y + ball.getRadius() > height ) {
-		ball.setPosition(ball.getPosition().x, height-ball.getRadius());
-		ball.velocity.y = ball.velocity.y * -1;
-	}
+	//update the ball
+	ball.move(ball.velocity * deltaTime.asSeconds());
 
-	//detect is ball is to the right of screen
-	
-	if (ball.getPosition().x + ball.getRadius() > width) {
-		ball.setPosition(width-ball.getRadius(), ball.getPosition().y);
-		ball.velocity.x = ball.velocity.x * -1;
-	}
-
-	//detect if ball is left of screen
-
-	if (ball.getPosition().x < 0) {
-		ball.setPosition(0, ball.getPosition().y);
-		ball.velocity.x = ball.velocity.x * -1;
-	}
-
-    
 	
 
 }
@@ -152,6 +135,8 @@ void Game::update(sf::Time deltaTime) {
 void Game::render(){
 	mWindow.clear();
 	mWindow.draw(ball);
+	mWindow.draw(lPaddle);
+	mWindow.draw(rPaddle);
 	mWindow.display();
 }
 
