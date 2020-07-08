@@ -52,12 +52,12 @@ void Ball::collision(Paddle lPaddle, Paddle rPaddle) {
 	//collide with paddles
 
 	if (lPaddle.getGlobalBounds().contains(getPosition())){
-		setPosition(lPaddle.distanceFromWall + lPaddle.width, getPosition().y);
+		setPosition(lPaddle.distanceFromWall + lPaddle.pWidth, getPosition().y);
 		velocity.x = velocity.x * -1;
 	}
 
 	if (rPaddle.getGlobalBounds().contains(getPosition())) {
-		setPosition(width - rPaddle.distanceFromWall - rPaddle.width, getPosition().y);
+		setPosition(width - rPaddle.distanceFromWall - rPaddle.pWidth, getPosition().y);
 		velocity.x = velocity.x * -1;
 	}
 

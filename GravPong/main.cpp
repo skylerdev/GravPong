@@ -22,15 +22,18 @@ class Game{
 		Ball ball;
 		Paddle lPaddle = Paddle(true);
 		Paddle rPaddle = Paddle(false);
-		bool mIsMovingUp = false;
-		bool mIsMovingDown = false;
-		bool mIsMovingRight = false;
-		bool mIsMovingLeft = false;
+		bool lIsMovingUp = false;
+		bool lIsMovingDown = false;
+		bool lIsGrav = false;
+		bool rIsGrav = false;
 		const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
-		
-		
-	
 
+		//background shapes
+
+		sf::RectangleShape bg;
+		sf::RectangleShape lGravShape;
+		sf::RectangleShape rGravShape;
+		
 	 
 
 };
@@ -41,7 +44,21 @@ Game::Game()
 : mWindow(sf::VideoMode(1200, 800), "SFML")
 , ball()
 {
-	
+	bg.setSize(sf::Vector2f(width, height));
+	bg.setPosition(0, 0);
+	bg.setFillColor(sf::Color::White);
+
+	sf::Color gravColor = sf::Color(169, 169, 169, 200);
+
+	lGravShape.setSize(sf::Vector2f(width/2, height));
+	rGravShape.setSize(sf::Vector2f(width/2, height));
+
+	lGravShape.setFillColor(gravColor);
+	rGravShape.setFillColor(gravColor);
+
+	lGravShape.setPosition(0, 0);
+	rGravShape.setPosition(width/2, 0);
+
 }
 
 void Game::run(){
@@ -87,43 +104,53 @@ void Game::processEvents(){
 }
 
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
-	if (key == sf::Keyboard::W)
-		mIsMovingUp = isPressed;
-	else if (key == sf::Keyboard::S)
-		mIsMovingDown = isPressed;
-	else if (key == sf::Keyboard::A)
-		mIsMovingLeft = isPressed;
+	if (key == sf::Keyboard::S)
+		lIsMovingUp = isPressed;
 	else if (key == sf::Keyboard::D)
-		mIsMovingRight = isPressed;
-
+		lIsMovingDown = isPressed;
+	else if (key == sf::Keyboard::F)
+		lIsGrav = isPressed;
 }
 
 void Game::update(sf::Time deltaTime) {
 	sf::Vector2f movement(0.f, 0.f);
-	if (mIsMovingUp)
-		movement.y -= 2.f;
-	if (mIsMovingDown)
-		movement.y += 2.f;
-	if (mIsMovingRight)
-		movement.x += 2.f;
-	if (mIsMovingLeft)
-		movement.x -= 2.f;
-
+	if (lIsMovingUp)
+		movement.y -= 25.f;
+	if (lIsMovingDown)
+		movement.y += 25.f;
+	if (lIsGrav && ball.getPosition().x < width/2)
+		ball.velocity.x -= GRAV_SPEED_INCREASE;
+	if(rIsGrav && ball.getPosition().x > width / 2)
+		ball.velocity.x += GRAV_SPEED_INCREASE;
 	//update the paddles
+
+
+	//right paddle ai
 	
+	if (ball.getPosition().x > width - 300) {
+		//trigger grav
+		rIsGrav = true;
+	}
+	else {
+		rIsGrav = false;
+	}
 
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
 
 	//update the paddles
 	lPaddle.move(movement);
+	lPaddle.restrictIfOutOfBounds();
+	
+	rPaddle.setPosition(rPaddle.getPosition().x, ball.getPosition().y - 100);
 
 	//update ball velocity if colliding
 	ball.collision(lPaddle, rPaddle);
 
 
 
-	
+	//ball max velocity check 
+
 
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
@@ -134,9 +161,20 @@ void Game::update(sf::Time deltaTime) {
 
 void Game::render(){
 	mWindow.clear();
+	
+	mWindow.draw(bg);
+
+	if (lIsGrav) {
+		mWindow.draw(lGravShape);
+	}
+	if (rIsGrav) {
+		mWindow.draw(rGravShape);
+	}
+
 	mWindow.draw(ball);
 	mWindow.draw(lPaddle);
 	mWindow.draw(rPaddle);
+
 	mWindow.display();
 }
 
@@ -144,6 +182,8 @@ void Game::render(){
 
 int main(){
 
+	 
+	
 
 	Game game;
 	game.run();
