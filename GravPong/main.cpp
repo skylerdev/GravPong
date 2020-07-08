@@ -12,6 +12,7 @@ class Game{
 		void run();
 
 	private:
+		void setup();
 		void processEvents();
 		void update(sf::Time);
 		void render();
@@ -54,20 +55,25 @@ Game::Game()
 : mWindow(sf::VideoMode(1200, 800), "SFML")
 , ball()
 {
+	setup();
+
+}
+
+void Game::setup() {
 	bg.setSize(sf::Vector2f(width, height));
 	bg.setPosition(0, 0);
 	bg.setFillColor(sf::Color::White);
 
 	sf::Color gravColor = sf::Color(169, 169, 169, 200);
 
-	lGravShape.setSize(sf::Vector2f(width/2, height));
-	rGravShape.setSize(sf::Vector2f(width/2, height));
+	lGravShape.setSize(sf::Vector2f(width / 2, height));
+	rGravShape.setSize(sf::Vector2f(width / 2, height));
 
 	lGravShape.setFillColor(gravColor);
 	rGravShape.setFillColor(gravColor);
 
 	lGravShape.setPosition(0, 0);
-	rGravShape.setPosition(width/2, 0);
+	rGravShape.setPosition(width / 2, 0);
 
 	font.loadFromFile("Roboto-Regular.ttf");
 
@@ -82,7 +88,6 @@ Game::Game()
 	rScoreText.setFillColor(sf::Color::Red);
 	rScoreText.setFont(font);
 	rScoreText.setPosition(width / 2 + 100, 30);
-
 }
 
 void Game::run(){
