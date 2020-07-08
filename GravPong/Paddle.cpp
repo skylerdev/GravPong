@@ -5,10 +5,10 @@
 Paddle::Paddle(bool l)
 {
 	if (l) {
-		setPosition(distanceFromWall, 20);
+		setPosition(P_DISTANCE_FROM_WALL, 20);
 	}
 	else {
-		setPosition(1200-distanceFromWall, 20);
+		setPosition(1200-P_DISTANCE_FROM_WALL, 20);
 	}
 
 	setSize(sf::Vector2f(pWidth, pHeight));
@@ -29,4 +29,8 @@ void Paddle::restrictIfOutOfBounds() {
 	if (getPosition().y + pHeight > height)
 		setPosition(getPosition().x, height-pHeight);
 
+}
+
+void Paddle::resetPosition() {
+	setPosition(getPosition().x, 20);
 }

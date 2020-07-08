@@ -3,7 +3,7 @@
 #include "Ball.h"
 #include <iostream>
 #include "Consts.h"
-
+#include <string>
 
 class Game{
 
@@ -16,6 +16,7 @@ class Game{
 		void update(sf::Time);
 		void render();
 		void handlePlayerInput(sf::Keyboard::Key, bool);
+		void resetPositions();
 
 	private:
 		sf::RenderWindow mWindow;
@@ -26,6 +27,15 @@ class Game{
 		bool lIsMovingDown = false;
 		bool lIsGrav = false;
 		bool rIsGrav = false;
+
+		int lScore = 0;
+		int rScore = 0;
+
+		sf::Text lScoreText;
+		sf::Text rScoreText;
+
+		sf::Font font;
+
 		const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
 		//background shapes
@@ -59,6 +69,20 @@ Game::Game()
 	lGravShape.setPosition(0, 0);
 	rGravShape.setPosition(width/2, 0);
 
+	font.loadFromFile("Roboto-Regular.ttf");
+
+	lScoreText.setCharacterSize(30);
+	lScoreText.setStyle(sf::Text::Bold);
+	lScoreText.setFillColor(sf::Color::Red);
+	lScoreText.setFont(font);
+	lScoreText.setPosition(width / 2 - 130, 30);
+
+	rScoreText.setCharacterSize(30);
+	rScoreText.setStyle(sf::Text::Bold);
+	rScoreText.setFillColor(sf::Color::Red);
+	rScoreText.setFont(font);
+	rScoreText.setPosition(width / 2 + 100, 30);
+
 }
 
 void Game::run(){
@@ -76,6 +100,12 @@ void Game::run(){
 		}
 		render();
 	}
+}
+
+void Game::resetPositions() {
+	ball.resetPosition();
+	lPaddle.resetPosition();
+	lPaddle.resetPosition();
 }
 
 void Game::processEvents(){
@@ -113,6 +143,23 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
 }
 
 void Game::update(sf::Time deltaTime) {
+
+	//detect is ball is to the right of screen
+
+	if (ball.getPosition().x + ball.getRadius() > width) {
+		resetPositions();
+		lScore++;
+	}
+
+	//detect if ball is left of screen
+
+	if (ball.getPosition().x < 0) {
+		resetPositions();
+		rScore++;
+	}
+
+
+
 	sf::Vector2f movement(0.f, 0.f);
 	if (lIsMovingUp)
 		movement.y -= 25.f;
@@ -155,6 +202,7 @@ void Game::update(sf::Time deltaTime) {
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
 
+
 	
 
 }
@@ -174,6 +222,11 @@ void Game::render(){
 	mWindow.draw(ball);
 	mWindow.draw(lPaddle);
 	mWindow.draw(rPaddle);
+
+	lScoreText.setString(std::to_string(lScore));
+	rScoreText.setString(std::to_string(rScore));
+	mWindow.draw(lScoreText);
+	mWindow.draw(rScoreText);
 
 	mWindow.display();
 }

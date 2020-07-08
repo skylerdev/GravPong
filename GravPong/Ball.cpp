@@ -1,13 +1,12 @@
 #include "Ball.h"
 #include "Consts.h"
 
-Ball::Ball() : velocity(0.f, 0.f)
+Ball::Ball()
 {
-	velocity.x += INIT_SPEED;
-	velocity.y += INIT_SPEED;
 
+	resetPosition();
 	setRadius(BALL_SIZE);
-	setPosition(120.f, 120.f);
+	
 	setFillColor(sf::Color::Cyan);
 }
 
@@ -35,30 +34,26 @@ void Ball::collision(Paddle lPaddle, Paddle rPaddle) {
 		velocity.y = velocity.y * -1;
 	}
 
-	//detect is ball is to the right of screen
-
-	if (getPosition().x + getRadius() > width) {
-		setPosition(width - getRadius(), getPosition().y);
-		velocity.x = velocity.x * -1;
-	}
-
-	//detect if ball is left of screen
-
-	if (getPosition().x < 0) {
-		setPosition(0, getPosition().y);
-		velocity.x = velocity.x * -1;
-	}
 
 	//collide with paddles
 
 	if (lPaddle.getGlobalBounds().contains(getPosition())){
-		setPosition(lPaddle.distanceFromWall + lPaddle.pWidth, getPosition().y);
+		setPosition(lPaddle.P_DISTANCE_FROM_WALL + lPaddle.pWidth, getPosition().y);
 		velocity.x = velocity.x * -1;
 	}
 
 	if (rPaddle.getGlobalBounds().contains(getPosition())) {
-		setPosition(width - rPaddle.distanceFromWall - rPaddle.pWidth, getPosition().y);
+		setPosition(width - rPaddle.P_DISTANCE_FROM_WALL - rPaddle.pWidth, getPosition().y);
 		velocity.x = velocity.x * -1;
 	}
+
+}
+
+void Ball::resetPosition() {
+	velocity = sf::Vector2f(0.f, 0.f);
+	velocity.x += INIT_SPEED;
+	velocity.y += INIT_SPEED;
+
+	setPosition(INIT_POS, INIT_POS);
 
 }
