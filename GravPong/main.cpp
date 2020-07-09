@@ -37,14 +37,15 @@ class Game{
 
 		sf::Font font;
 
-		const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+		const sf::Time TimePerFrame = sf::seconds(1.f / 120.f);
 
 		//background shapes
 
 		sf::RectangleShape bg;
 		sf::RectangleShape lGravShape;
 		sf::RectangleShape rGravShape;
-		
+		sf::RectangleShape speedMeterShape;
+
 	 
 
 };
@@ -139,6 +140,8 @@ void Game::processEvents(){
 }
 
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
+	
+	
 	if (key == sf::Keyboard::S)
 		lIsMovingUp = isPressed;
 	else if (key == sf::Keyboard::D)
@@ -148,6 +151,15 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
 }
 
 void Game::update(sf::Time deltaTime) {
+
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	{
+		lIsGrav = true;
+	}
+	else {
+		lIsGrav = false;
+	}
+
 
 	//detect is ball is to the right of screen
 
@@ -191,10 +203,13 @@ void Game::update(sf::Time deltaTime) {
 	ball.move(ball.velocity * deltaTime.asSeconds());
 
 	//update the paddles
-	lPaddle.move(movement);
+	lPaddle.updateWithMouse(sf::Mouse::getPosition(mWindow));
+	rPaddle.updateWithBall(ball.getPosition());
+	
+
 	lPaddle.restrictIfOutOfBounds();
 	
-	rPaddle.setPosition(rPaddle.getPosition().x, ball.getPosition().y - 100);
+	
 
 	//update ball velocity if colliding
 	ball.collision(lPaddle, rPaddle);
@@ -227,6 +242,8 @@ void Game::render(){
 	mWindow.draw(ball);
 	mWindow.draw(lPaddle);
 	mWindow.draw(rPaddle);
+
+	//mWindow.draw(speedMeterRect);
 
 	lScoreText.setString(std::to_string(lScore));
 	rScoreText.setString(std::to_string(rScore));

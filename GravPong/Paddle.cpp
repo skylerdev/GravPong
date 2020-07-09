@@ -3,7 +3,8 @@
 
 
 Paddle::Paddle(bool l)
-{
+{	
+	left = l;
 	if (l) {
 		setPosition(P_DISTANCE_FROM_WALL, 20);
 	}
@@ -33,4 +34,12 @@ void Paddle::restrictIfOutOfBounds() {
 
 void Paddle::resetPosition() {
 	setPosition(getPosition().x, 20);
+}
+
+void Paddle::updateWithMouse(sf::Vector2i mousePos) {
+	setPosition(getPosition().x, mousePos.y - pHeight/2);
+}
+
+void Paddle::updateWithBall(sf::Vector2f ballPos) {
+	setPosition(getPosition().x, ballPos.y - 100);
 }
