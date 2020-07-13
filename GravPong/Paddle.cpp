@@ -9,7 +9,7 @@ Paddle::Paddle(bool l)
 		setPosition(P_DISTANCE_FROM_WALL, 20);
 	}
 	else {
-		setPosition(1200-P_DISTANCE_FROM_WALL, 20);
+		setPosition(width-P_DISTANCE_FROM_WALL, 20);
 	}
 
 	setSize(sf::Vector2f(pWidth, pHeight));

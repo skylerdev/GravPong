@@ -12,7 +12,7 @@ public:
 	void resetPosition();
 	void updateWithMouse(sf::Vector2i);
 	void updateWithBall(sf::Vector2f);
-private:
+public:
 	const float pHeight = 270.f;
 	const float pWidth = 25.f;
 	const float P_DISTANCE_FROM_WALL = 90.f;

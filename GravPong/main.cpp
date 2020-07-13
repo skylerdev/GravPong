@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Consts.h"
 #include <string>
+#include <SFML/Audio.hpp>
 
 class Game{
 
@@ -18,6 +19,7 @@ class Game{
 		void render();
 		void handlePlayerInput(sf::Keyboard::Key, bool);
 		void resetPositions();
+		void collision();
 
 	private:
 		sf::RenderWindow mWindow;
@@ -45,6 +47,10 @@ class Game{
 		sf::RectangleShape lGravShape;
 		sf::RectangleShape rGravShape;
 		sf::RectangleShape speedMeterShape;
+		sf::SoundBuffer hitBuf;
+	    sf::SoundBuffer scoreBuf;
+		sf::Sound hitSound;
+		sf::Sound scoreSound;
 
 	 
 
@@ -53,7 +59,7 @@ class Game{
 //This constuctor not only constructs Game(), but also creates an mWindow with args and uses methods
 //to set properties of mPlayer somehow
 Game::Game()
-: mWindow(sf::VideoMode(1200, 800), "SFML")
+: mWindow(sf::VideoMode(width, height), "SFML")
 , ball()
 {
 	setup();
@@ -76,7 +82,7 @@ void Game::setup() {
 	lGravShape.setPosition(0, 0);
 	rGravShape.setPosition(width / 2, 0);
 
-	font.loadFromFile("Roboto-Regular.ttf");
+	font.loadFromFile("resources/Roboto-Regular.ttf");
 
 	lScoreText.setCharacterSize(30);
 	lScoreText.setStyle(sf::Text::Bold);
@@ -89,6 +95,15 @@ void Game::setup() {
 	rScoreText.setFillColor(sf::Color::Red);
 	rScoreText.setFont(font);
 	rScoreText.setPosition(width / 2 + 100, 30);
+
+
+	hitBuf.loadFromFile("resources/hit.wav");
+	scoreBuf.loadFromFile("resources/score.wav");
+	hitSound.setBuffer(hitBuf);
+	scoreSound.setBuffer(scoreBuf);
+
+
+	
 }
 
 void Game::run(){
@@ -150,6 +165,8 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed) {
 		lIsGrav = isPressed;
 }
 
+
+
 void Game::update(sf::Time deltaTime) {
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -160,21 +177,8 @@ void Game::update(sf::Time deltaTime) {
 		lIsGrav = false;
 	}
 
-
-	//detect is ball is to the right of screen
-
-	if (ball.getPosition().x + ball.getRadius() > width) {
-		resetPositions();
-		lScore++;
-	}
-
-	//detect if ball is left of screen
-
-	if (ball.getPosition().x < 0) {
-		resetPositions();
-		rScore++;
-	}
-
+	
+	
 
 
 	sf::Vector2f movement(0.f, 0.f);
@@ -210,20 +214,63 @@ void Game::update(sf::Time deltaTime) {
 	lPaddle.restrictIfOutOfBounds();
 	
 	
-
-	//update ball velocity if colliding
-	ball.collision(lPaddle, rPaddle);
-
-
-
-	//ball max velocity check 
-
+	//run collision detection code
+	collision();
 
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
 
 
 	
+
+}
+
+//
+//COLLISION DETECTION CODE
+//
+
+void Game::collision() {
+	
+	sf::Vector2f bPos = ball.getPosition();
+
+	//detect if ball is above or below screen
+	if (bPos.y < 0) {
+		ball.setPosition(bPos.x, 0);
+		ball.velocity.y = ball.velocity.y * -1;
+	}
+	if (bPos.y + ball.getRadius() > height) {
+		ball.setPosition(bPos.x, height - ball.getRadius());
+		ball.velocity.y = ball.velocity.y * -1;
+	}
+
+
+	//collide with paddles
+
+	if (lPaddle.getGlobalBounds().contains(bPos)) {
+		ball.setPosition(lPaddle.P_DISTANCE_FROM_WALL + lPaddle.pWidth, bPos.y);
+		ball.velocity.x = ball.velocity.x * -1;
+		hitSound.play();
+	}
+
+	if (rPaddle.getGlobalBounds().contains(bPos)) {
+		ball.setPosition(width - rPaddle.P_DISTANCE_FROM_WALL - rPaddle.pWidth, bPos.y);
+		ball.velocity.x = ball.velocity.x * -1;
+		hitSound.play();
+	}
+
+	//detect is ball is to the right of screen
+	if (ball.getPosition().x + ball.getRadius() > width) {
+		resetPositions();
+		lScore++;
+		scoreSound.play();
+	}
+
+	//detect if ball is left of screen
+	if (ball.getPosition().x < 0) {
+		resetPositions();
+		rScore++;
+		scoreSound.play();
+	}
 
 }
 
@@ -243,8 +290,6 @@ void Game::render(){
 	mWindow.draw(lPaddle);
 	mWindow.draw(rPaddle);
 
-	//mWindow.draw(speedMeterRect);
-
 	lScoreText.setString(std::to_string(lScore));
 	rScoreText.setString(std::to_string(rScore));
 	mWindow.draw(lScoreText);
@@ -256,9 +301,6 @@ void Game::render(){
 
 
 int main(){
-
-	 
-	
 
 	Game game;
 	game.run();

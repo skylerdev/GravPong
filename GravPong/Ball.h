@@ -8,7 +8,6 @@ class Ball :
 public:
 	Ball();
 	~Ball();
-	void collision(Paddle, Paddle);
 	void resetPosition();
 
 public:
