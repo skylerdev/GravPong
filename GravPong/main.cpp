@@ -126,7 +126,7 @@ void Game::run(){
 void Game::resetPositions() {
 	ball.resetPosition();
 	lPaddle.resetPosition();
-	lPaddle.resetPosition();
+	rPaddle.resetPosition();
 }
 
 void Game::processEvents(){
@@ -177,24 +177,21 @@ void Game::update(sf::Time deltaTime) {
 		lIsGrav = false;
 	}
 
-	
-	
-
-
-	sf::Vector2f movement(0.f, 0.f);
-	if (lIsMovingUp)
-		movement.y -= 25.f;
-	if (lIsMovingDown)
-		movement.y += 25.f;
-	if (lIsGrav && ball.getPosition().x < width/2)
+	//gravity
+	if (lIsGrav && ball.getPosition().x < width / 2)
 		ball.velocity.x -= GRAV_SPEED_INCREASE;
-	if(rIsGrav && ball.getPosition().x > width / 2)
+	if (rIsGrav && ball.getPosition().x > width / 2)
 		ball.velocity.x += GRAV_SPEED_INCREASE;
-	//update the paddles
+
 
 
 	//right paddle ai
-	
+	sf::Vector2f movement(0.f, 0.f);
+	if (ball.getPosition().y + ball.getRadius()/2 < rPaddle.getPosition().y + rPaddle.pWidth / 2)
+		movement.y -= AI_SET_PADDLE_SPEED;
+	if (ball.getPosition().y + ball.getRadius() / 2 > rPaddle.getPosition().y + rPaddle.pWidth/2)
+		movement.y += AI_SET_PADDLE_SPEED;
+	rPaddle.move(movement);
 	if (ball.getPosition().x > width - 300) {
 		//trigger grav
 		rIsGrav = true;
@@ -208,14 +205,18 @@ void Game::update(sf::Time deltaTime) {
 
 	//update the paddles
 	lPaddle.updateWithMouse(sf::Mouse::getPosition(mWindow));
-	rPaddle.updateWithBall(ball.getPosition());
-	
+	//rPaddle.updateWithBall(ball.getPosition());
+
 
 	lPaddle.restrictIfOutOfBounds();
-	
+	rPaddle.restrictIfOutOfBounds();
 	
 	//run collision detection code
 	collision();
+
+	//update score text 
+	lScoreText.setString(std::to_string(lScore));
+	rScoreText.setString(std::to_string(rScore));
 
 	//update the ball
 	ball.move(ball.velocity * deltaTime.asSeconds());
@@ -289,9 +290,6 @@ void Game::render(){
 	mWindow.draw(ball);
 	mWindow.draw(lPaddle);
 	mWindow.draw(rPaddle);
-
-	lScoreText.setString(std::to_string(lScore));
-	rScoreText.setString(std::to_string(rScore));
 	mWindow.draw(lScoreText);
 	mWindow.draw(rScoreText);
 
